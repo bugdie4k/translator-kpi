@@ -1,0 +1,2 @@
+(defpackage #:translator
+  :use #:cl)
