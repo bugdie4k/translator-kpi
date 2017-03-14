@@ -1,1 +1,3 @@
-(in-package :translator)
+(in-package :translator-parser)
+
+(defun parser ())
