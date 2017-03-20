@@ -1,0 +1,12 @@
+(in-package :translator-utils)
+
+(defmacro read-file-by-char ((filename char &key stream-binding-symbol) &body body)
+  (let ((stream (if-let ((it stream-binding-symbol)) it (gensym "STREAM-")))
+        (eof-value (gensym "EOF-"))
+        (eof-value-with-error (gensym "EOF-ERROR")))
+    `(with-open-file (,stream ,filename)
+       (do ((,char (read-char ,stream nil ',eof-value-with-error)
+                   (read-char ,stream nil ',eof-value)))
+           ((cond ((eq ,char ',eof-value) t)
+                  ((eq ,char ',eof-value-with-error) (error 'translator-common:empty-file :message "This file is empty" :file ,filename))))
+         ,@body))))
