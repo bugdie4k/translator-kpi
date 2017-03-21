@@ -1,7 +1,6 @@
 (defpackage #:translator-utils
   (:use #:cl
-        #:alexandria)
-  (:export #:read-file-by-char))
+        #:alexandria))
 
 (defpackage #:translator-common
   (:use #:cl

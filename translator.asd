@@ -8,7 +8,7 @@
                (:module src
                 :serial t
                 :components ((:module utils
-                              :components ((:file "translator-utils")))
+                              :components ((:file "translator-utils"))) ;; is empty
                              (:module common
                               :components ((:file "translator-common")))
                              (:module lexer

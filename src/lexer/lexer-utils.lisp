@@ -11,6 +11,12 @@
   (format stream "~A~%character: ~A~%line: ~A~%column: ~A~%"
           (message c) (wrong-char c) (line c) (column c)))
 
+(define-condition empty-file (translator-condition)
+  ((file :reader file :initarg :file :initform nil)))
+
+(defmethod print-object ((c empty-file) stream)
+  (format stream "~A~%file: ~A~%" (message c) (file c)))
+
 ;; dynamic vars
 
 (defparameter *token-list* nil)
@@ -28,10 +34,6 @@
                                              "+" plus
                                              "-" minus) :test #'equal))
 
-;; (defparameter *delimiters* nil)
-
-;; (defparameter *identifiers* (make-hash-table))
-
 (defparameter *current-lexem* nil)
 
 (defparameter *char* nil)
@@ -48,11 +50,12 @@
 
 ;; functions
 
-;; (defun add-current-lexem-to-identifiers ()
-;;   (setf (gethash (get-current-lexem-string) *identifiers*) t))
-
-;; (defun add-to-identifiers (string)
-;;   (setf (gethash string *identifiers*) t))
+(defun read-next-char ()
+  (setf *char* (read-char *stream* nil 'eof))
+  (unless (eq *char* 'eof)
+    (if (char= *char* #\newline)
+        (progn (incf *line*) (setf *column* -1))
+        (incf *column*))))
 
 (defun push-token-to-token-list (&key type type-fn)
   "type-fn uses current lexem to determine it's type."
@@ -64,8 +67,8 @@
     (push (make-token :string lexem :type sure-type :line *line* :column *lexem-start-column*) *token-list*)))
 
 (defun delimiter? (char)
-  (or (<= (char-code char) 32) ;; 32 - #\space
-      (= (char-code char) 59)))  ;; 59 - #\semicolon
+  (or (<= (char-code char) 32)               ;; 32 - #\space
+      (= (char-code char) 59)))              ;; 59 - #\semicolon
 
 (defun write-char-to-current-lexem ()
   (format *current-lexem* "~A" *char*))
@@ -79,3 +82,21 @@
 
 (defun get-keyword-type (keyword)
   (gethash keyword *keywords*))
+
+;; read file char by char
+
+;; (defmacro read-file-by-char ((filename char &key stream-binding-symbol) &body body)
+;;   (let ((stream (if-let ((it stream-binding-symbol)) it (gensym "STREAM-")))
+;;         (eof-value (gensym "EOF-"))
+;;         (eof-value-with-error (gensym "EOF-ERROR")))
+;;     `(with-open-file (,stream ,filename)
+;;        (do ((,char (read-char ,stream nil ',eof-value-with-error)
+;;                    (read-char ,stream nil ',eof-value)))
+;;            ((cond ((eq ,char ',eof-value)
+;;                    (if (or (eq *state* :comment)
+;;                            (eq *state* :comment-end))
+;;                        (error 'wrong-character :message "Unexpected end of file after the following position."
+;;                                                :line *line* :column *column* :wrong-char 'eof)
+;;                        t))
+;;                   ((eq ,char ',eof-value-with-error) (error 'translator-common:empty-file :message "This file is empty" :file ,filename))))
+;;          ,@body))))

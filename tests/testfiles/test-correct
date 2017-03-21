@@ -1,7 +1,12 @@
 PROGRAM TEST01;
 BEGIN
-  LOOP
+  LOOP (* this line is commentary and should be ignored *)
     FOR I := -1 TO 12 DO
+        (*******************************
+        this is
+        the commentary that occupies
+        several lines
+        ********************************)
         FOR J := 2+3456-1 TO I DO
           FOR IDENTIFIER0 := IDENTIFIER1 TO IDENTIFUER2 DO ENDFOR;
         ENDFOR;
