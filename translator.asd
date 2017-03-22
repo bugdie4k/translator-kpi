@@ -2,14 +2,12 @@
   :description "Lexer and parser for KPI."
   :version "0.0.0"
   :author "Danylo Fedorov <fedorough@gmail.com>"
-  :depends-on ("alexandria")
+  :depends-on ("alexandria" "small-tests")
   :serial t
   :components ((:file "package")
                (:module src
                 :serial t
-                :components ((:module utils
-                              :components ((:file "translator-utils"))) ;; is empty
-                             (:module common
+                :components ((:module common
                               :components ((:file "translator-common")))
                              (:module lexer
                               :serial t
@@ -18,6 +16,5 @@
                              (:module parser
                               :components ((:file "parser")))))
                (:module tests
-                :components ((:file "test-utils")
-                             (:file "lexer-test")
+                :components ((:file "lexer-test")
                              (:file "parser-test")))))

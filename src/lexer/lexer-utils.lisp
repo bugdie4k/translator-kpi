@@ -36,11 +36,7 @@
 
 (defparameter *current-lexem* nil)
 
-(defparameter *char* nil)
-
 (defparameter *stream* nil)
-
-(defparameter *state* nil)
 
 (defparameter *line* nil)
 
@@ -50,28 +46,42 @@
 
 ;; functions
 
+(defun char-is (fn char)
+  (unless (eq char 'eof)
+    (funcall fn char)))
+
+(defun ensure-char-upcase (char)
+  "Lowercase chars aren't alowed by the grammar, but it is not a big deal converting them to uppercase"
+  (if (lower-case-p char)
+      (progn (warn 'wrong-character :message "There is a lowercase character." :char char :line *line* :column *column*)     
+             (char-upcase char))
+      char))
+
 (defun read-next-char ()
-  (setf *char* (read-char *stream* nil 'eof))
-  (unless (eq *char* 'eof)
-    (if (char= *char* #\newline)
-        (progn (incf *line*) (setf *column* -1))
-        (incf *column*))))
+  "Read char from stream bound to dynamic variable *stream*"
+  (let ((char (read-char *stream* nil 'eof)))
+    (unless (eq char 'eof)
+      (if (char= char #\newline)
+          (progn (incf *line*) (setf *column* -1))
+          (incf *column*)))
+    char))
 
 (defun push-token-to-token-list (&key type type-fn)
   "type-fn uses current lexem to determine it's type."
   (let* ((lexem (get-current-lexem-string))
          (sure-type (cond ((and type-fn (not type)) (funcall type-fn lexem))
-                     ((and (not type-fn) type) type)
-                     (t (error "add-current-lexem-to-identifiers/push-token-to-token-list: CHOOSE ONE OF TWO ARGUMENTS TO SUPPLY")))))
-    ;;(when (eq sure-type 'user-defined-identifier) (add-to-identifiers lexem))
-    (push (make-token :string lexem :type sure-type :line *line* :column *lexem-start-column*) *token-list*)))
+                          ((and (not type-fn) type) type)
+                          (t (error "add-current-lexem-to-identifiers/push-token-to-token-list: CHOOSE ONE OF TWO ARGUMENTS TO SUPPLY")))))
+    (push (make-token :lexem lexem :type sure-type :line *line* :column *lexem-start-column*) *token-list*)))
 
-(defun delimiter? (char)
-  (or (<= (char-code char) 32)               ;; 32 - #\space
-      (= (char-code char) 59)))              ;; 59 - #\semicolon
+(defun whitespace? (char)
+  (<= (char-code char) 32))              ;; 32 - #\space
 
-(defun write-char-to-current-lexem ()
-  (format *current-lexem* "~A" *char*))
+(defun delimier? (char)
+  (= (char-code char) 59))
+
+(defun write-char-to-current-lexem (char)
+  (format *current-lexem* "~A" char))
 
 (defun get-current-lexem-string ()
   ;; 'get-output-stream-string' also clears the stream
@@ -82,21 +92,3 @@
 
 (defun get-keyword-type (keyword)
   (gethash keyword *keywords*))
-
-;; read file char by char
-
-;; (defmacro read-file-by-char ((filename char &key stream-binding-symbol) &body body)
-;;   (let ((stream (if-let ((it stream-binding-symbol)) it (gensym "STREAM-")))
-;;         (eof-value (gensym "EOF-"))
-;;         (eof-value-with-error (gensym "EOF-ERROR")))
-;;     `(with-open-file (,stream ,filename)
-;;        (do ((,char (read-char ,stream nil ',eof-value-with-error)
-;;                    (read-char ,stream nil ',eof-value)))
-;;            ((cond ((eq ,char ',eof-value)
-;;                    (if (or (eq *state* :comment)
-;;                            (eq *state* :comment-end))
-;;                        (error 'wrong-character :message "Unexpected end of file after the following position."
-;;                                                :line *line* :column *column* :wrong-char 'eof)
-;;                        t))
-;;                   ((eq ,char ',eof-value-with-error) (error 'translator-common:empty-file :message "This file is empty" :file ,filename))))
-;;          ,@body))))

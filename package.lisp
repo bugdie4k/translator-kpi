@@ -8,7 +8,7 @@
         #:translator-utils)
   (:export #:token
            #:make-token
-           #:token-string
+           #:token-lexem
            #:token-type
            #:token-line
            #:token-column
@@ -29,7 +29,6 @@
   (:export #:lexer
            ;; 
            #:wrong-character
-           #:wrong-char
            #:line
            #:column))
 
@@ -53,7 +52,7 @@
         #:translator-common
         #:translator-lexer
         #:translator-parser
-        #:test-utils)
+        #:small-tests)
   (:export #:test-lexer))
 
 (defpackage #:translator

@@ -25,7 +25,7 @@ and produces test functions with 'deftest' and then calls them."
          (local-let-list (map 'list (lambda (orig-let-form gen-global-let-form)
                                       `(,(first orig-let-form) ,(first gen-global-let-form)))
                               let-list global-let-list)))
-    (labels ((%expand-test-lists-list (test-lists-list)
+    (labels ((%expand-test-lists-list-and-collect-test-func-calls (test-lists-list n) ; n to control the number of dots in a row
                (when test-lists-list
                  (let* ((test-list (first test-lists-list))
                         (test-name (first test-list))
@@ -33,31 +33,39 @@ and produces test functions with 'deftest' and then calls them."
                         (form-expected (third test-list))
                         (test-fn (fourth test-list))
                         (test-full-name (intern (concatenate 'string (write-to-string lab-test-name) "-" (write-to-string test-name)))))
-                   ;; while generating 'deftests' i also collect a form in which test function should be called to
-                   ;; 'test-func-calls'.
-                   ;; i know that 'setf' is not functional, but i didn't want to mess with multiple-value-bind
-                   (setf test-func-calls (cons `(format t " ~A ~A~%"
-                                                        (handler-case (,test-full-name)
-                                                          (error (se) (declare (ignore se)) (push ',test-full-name failed-test-func-names) "-")
-                                                          (:no-error (ret-val) (declare (ignore ret-val)) "+"))
-                                                        ',test-full-name)
-                                               test-func-calls)) 
+                   ;; while generating 'deftests' i also collect a form in which test function should be called to 'test-func-calls'.
+                   (push `(format t "~A"
+                                  (handler-case (,test-full-name)
+                                    (error (se) (declare (ignore se)) (push ',test-full-name failed-test-func-names) "x")
+                                    (:no-error (ret-val) (declare (ignore ret-val)) (push ',test-full-name passed-test-func-names) ".")))
+                         test-func-calls)
+                   ;; if there are 30 dots and exses in a row push format with newline to a call
+                   (when (= n 30)
+                     (setf n 1)
+                     (push `(format t "~%") test-func-calls))
+                   ;; make list of 'deftests'
                    (cons `(deftest ,test-full-name ,local-let-list ,form-tested ,form-expected ,(if test-fn test-fn '(function equalp)))
-                         (%expand-test-lists-list (cdr test-lists-list)))))))      
+                         (%expand-test-lists-list-and-collect-test-func-calls (cdr test-lists-list) (1+ n)))))))      
       `(let* ,global-let-list
          ,@(append
-            ;; definition of test functions
-            (%expand-test-lists-list test-lists-list)
-            ;; call test functions
+            ;; defining test functions
+            (%expand-test-lists-list-and-collect-test-func-calls test-lists-list 1)
+            ;; defining tests function
             `((defun ,lab-test-name ()
-                (let ((failed-test-func-names))
-                  (format t "====== ~A ======~%" ',lab-test-name)
-                  ;; call functions of tests
-                  ,@(reverse test-func-calls)
+                (let ((failed-test-func-names)
+                      (passed-test-func-names))
+                  (format t "*** ~A ***~%" ',lab-test-name)
+                  ;; calling functions test functions
+                  ,@(reverse (cons '(format t "~%") test-func-calls))
+                  ;; report passed tests
+                  (format t "PASSED:~%~A"
+                          (if passed-test-func-names
+                              (format nil "~{ + ~A~%~}" (reverse passed-test-func-names))
+                              (format nil " + NONE~%")))
                   ;; report failed tests
-                  (format t " * FAILED:~%~A~%" 
+                  (format t "FAILED:~%~A~%" 
                           (if failed-test-func-names
-                              (format nil "~{   * ~A~%~}" failed-test-func-names)
-                              "   * NONE"))
+                              (format nil "~{ - ~A~%~}" (reverse failed-test-func-names))
+                              (format nil " - NONE~%")))
                   ;; return nil if failed and t if succeed
                   (null failed-test-func-names)))))))))

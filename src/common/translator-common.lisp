@@ -3,13 +3,13 @@
 ;; token definitions
 
 (defstruct token
-  string
   type
+  lexem
   line
   column)
 
 (defun token-equal (token1 token2)
-  (and (string= (token-string token1) (token-string token2))
+  (and (string= (token-lexem token1) (token-lexem token2))
        (eq (token-type token1) (token-type token2))
        (= (token-line token1) (token-line token2))
        (= (token-column token1) (token-column token2))))
