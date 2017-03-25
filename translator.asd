@@ -4,7 +4,7 @@
   :author "Danylo Fedorov <fedorough@gmail.com>"
   :depends-on ("alexandria" "small-tests")
   :serial t
-  :components ((:file "package")
+  :components ((:file "packages")
                (:module src
                 :serial t
                 :components ((:module common
