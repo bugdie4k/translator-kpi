@@ -14,7 +14,7 @@
                                                                        (format t "log/equal-token-essentials-list~%~A != ~A~%" el1 el2)
                                                                        (return 'not-equal)))))
                                                     (when (eq res 'not-equal) (return 'not-equal)))
-                                                  (progn (format t "log/equal-token-essentials-list~%~A~%!=~%~A~%" list1 list2) 'not-equal))))
+                                                  (progn (format t "log/equal-token-essentials-list~%~S~%!=~%~A~%" list1 list2) 'not-equal))))
                                     (when (eq res0 'not-equal) (return 'not-equal))))
                           (progn (format t "log/equal-token-essentials-list~%~A~%!=~%~A~%" list-list1 list-list2) 'not-equal)))))
 
@@ -42,7 +42,8 @@
      ("ENDFOR" ENDFOR 11 59) (";" SEMICOLON 11 65)
      ("ENDFOR" ENDFOR 12 8) (";" SEMICOLON 12 14)
      ("ENDFOR" ENDFOR 13 4) (";" SEMICOLON 13 10)
-     ("ENDLOOP" ENDLOOP 14 2) (";" SEMICOLON 14 9) ("END" END 15 0))
+     ("ENDLOOP" ENDLOOP 14 2) (";" SEMICOLON 14 9) ("END" END 15 0)
+     ("." FULL-STOP 15 3))
    #'equal-token-essentials-list)
   (error-one-char
    (handler-case (lexer (get-full-test-pathname "test-lexer-error-one-char"))
@@ -66,11 +67,19 @@ column: 11
    "This file is empty.
 file: /home/danylo/kpi/3/translators-marchenko/translator/tests/testfiles/test-lexer-error-empty-file
 ")
-  (error-unexpected-eof
+  (error-unexpected-eof1
    (handler-case (lexer (get-full-test-pathname "test-lexer-error-unexpected-eof"))
      (wrong-character (e) (print-object e nil)))
    "Unexpected end of file after the following position.
 character: EOF
 line: 15
 column: 2
+")
+  (error-unexpected-eof2
+   (handler-case (lexer (get-full-test-pathname "test-lexer-error-unexpected-eof2"))
+     (wrong-character (e) (print-object e nil)))
+   "Unexpected end of file after the following position.
+character: EOF
+line: 14
+column: 9
 "))

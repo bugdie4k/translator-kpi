@@ -46,6 +46,11 @@
 
 ;; functions
 
+(defmacro with-eof-check ((char-var) &body body)
+  `(if (eq ,char-var 'eof)
+       (error 'wrong-character :message "Unexpected end of file after the following position." :wrong-char ,char-var :line *line* :column *column*)
+       (progn ,@body)))
+
 (defun char-is (fn char)
   (unless (eq char 'eof)
     (funcall fn char)))
