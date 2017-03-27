@@ -2,7 +2,7 @@
   :description "Lexer and parser for KPI."
   :version "0.0.0"
   :author "Danylo Fedorov <fedorough@gmail.com>"
-  :depends-on ("alexandria" "small-tests")
+  :depends-on ("alexandria" "cmu-infix" "parse-number" "small-tests")
   :serial t
   :components ((:file "packages")
                (:module src

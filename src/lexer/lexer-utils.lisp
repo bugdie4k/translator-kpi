@@ -21,18 +21,18 @@
 
 (defparameter *token-list* nil)
 
-(defparameter *keywords* (plist-hash-table '("PROGRAM" program
-                                             "BEGIN" begin
-                                             "END" end
-                                             "LOOP" loop
-                                             "ENDLOOP" endloop
-                                             "FOR" for
-                                             "ENDFOR" endfor
-                                             "TO" to
-                                             "DO" do
-                                             ":=" assign
-                                             "+" plus
-                                             "-" minus) :test #'equal))
+(defparameter *keywords* (plist-hash-table '("PROGRAM" :program
+                                             "BEGIN" :begin
+                                             "END" :end
+                                             "LOOP" :loop
+                                             "ENDLOOP" :endloop
+                                             "FOR" :for
+                                             "ENDFOR" :endfor
+                                             "TO" :to
+                                             "DO" :do
+                                             ":=" :assign
+                                             "+" :plus
+                                             "-" :minus) :test #'equal))
 
 (defparameter *current-lexem* nil)
 
@@ -44,11 +44,11 @@
 
 (defparameter *lexem-start-column* nil)
 
-;; functions
+;; convinience functions and macros
 
 (defmacro with-eof-check ((char-var) &body body)
   `(if (eq ,char-var 'eof)
-       (error 'wrong-character :message "Unexpected end of file after the following position." :wrong-char ,char-var :line *line* :column *column*)
+       (error 'wrong-character :message "Unexpected end of file at the following position." :wrong-char ,char-var :line *line* :column *column*)
        (progn ,@body)))
 
 (defun char-is (fn char)
@@ -65,19 +65,29 @@
 (defun read-next-char ()
   "Read char from stream bound to dynamic variable *stream*"
   (let ((char (read-char *stream* nil 'eof)))
-    (unless (eq char 'eof)
-      (if (char= char #\newline)
-          (progn (incf *line*) (setf *column* -1))
-          (incf *column*)))
+    (if (or (eq char 'eof)
+            (not (char= char #\newline)))
+        (incf *column*)
+        (progn (incf *line*) (setf *column* -1)))
     char))
+
+(defun string2char (str)
+  (if (> (length str) 1)
+      (first (coerce 'list str))
+      (error "Argument is not a one char string: ~A" str)))
 
 (defun push-token-to-token-list (&key type type-fn)
   "type-fn uses current lexem to determine it's type."
   (let* ((lexem (get-current-lexem-string))
          (sure-type (cond ((and type-fn (not type)) (funcall type-fn lexem))
                           ((and (not type-fn) type) type)
-                          (t (error "add-current-lexem-to-identifiers/push-token-to-token-list: CHOOSE ONE OF TWO ARGUMENTS TO SUPPLY")))))
-    (push (make-token :lexem lexem :type sure-type :line *line* :column *lexem-start-column*) *token-list*)))
+                          (t (error "add-current-lexem-to-identifiers/push-token-to-token-list: CHOOSE ONE OF TWO ARGUMENTS TO SUPPLY"))))
+         (sure-lexem (case sure-type
+                       ;;(:keyword (intern lexem :keyword))
+                       (:number-literal (parse-number:parse-number lexem))
+                       ;;(:string-literal lexem)
+                       (t lexem))))
+    (push (make-token :lexem sure-lexem :type sure-type :line *line* :column *lexem-start-column*) *token-list*)))
 
 (defun whitespace? (char)
   (<= (char-code char) 32))              ;; 32 - #\space

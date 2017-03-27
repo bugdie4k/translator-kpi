@@ -1,5 +1,24 @@
 (in-package :translator-parser)
 
+;; dynamic vars
+
+(defparameter *token-list* nil)
+
+(defparameter *tree* nil)
+
+(defparameter *stack* nil)
+
+;; conditions
+
+(define-condition unexpected-token (translator-condition)
+  ((expected :reader expected :initarg :expected :initform nil)
+   (actual :reader actual :initarg :actual :initform nil)))
+
+(defmethod print-object ((c unexpected-token) stream)
+  (format stream "~A~%expected: ~A~%actual: ~A~%" (message c) (expected c) (actual c)))
+
+;; nodes
+
 (defmacro defnode (name direct-superclasses direct-slots)
   `(defclass ,name ,direct-superclasses
      ,(mapcar (lambda (slotname)
@@ -9,34 +28,14 @@
        direct-slots)))
 
 (defnode program-node ()
-  (name block))
-
-;; nodes
-
-;; (defnode position-mixin () (line column))
-
-(defnode program-node ()
   (name
    statements-list))
 
-(defnode loop-statement ()
+(defnode loop-statement-node ()
   (statements-list))
 
-(defnode for-statement ()
+(defnode for-statement-node ()
   (variable
-   from-expression
+   from-expression ;; prefix notation list
    to-expression
    statements-list))
-
-(defnode expression ()
-  prefix-notation-list)
-
-;; parse expression
-
-;; dynamic vars
-
-(defparameter *token-list* nil)
-
-(defparameter *tree* nil)
-
-(defparameter *stack* nil)
