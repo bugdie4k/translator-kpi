@@ -2,6 +2,8 @@ lexer.dot
 
 #### OVERKILL ####
 
+*.png
+
 # Created by https://www.gitignore.io/api/commonlisp,emacs,linux,joe,git
 
 ### CommonLisp ###
