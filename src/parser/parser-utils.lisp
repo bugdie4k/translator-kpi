@@ -10,12 +10,19 @@
 
 ;; conditions
 
-(define-condition unexpected-token (translator-condition)
-  ((expected :reader expected :initarg :expected :initform nil)
-   (actual :reader actual :initarg :actual :initform nil)))
+(define-condition parser-error (translator-condition) nil)
+
+(define-condition unexpected-token (parser-error)
+  ((expected-type :reader expected-type :initarg :expected-type :initform nil)
+   (actual-token :reader actual-token :initarg :actual-token :initform nil)))
 
 (defmethod print-object ((c unexpected-token) stream)
-  (format stream "~A~%expected: ~A~%actual: ~A~%" (message c) (expected c) (actual c)))
+  (let ((tok (actual-token c)))
+    (format stream "~A~%expected type: ~A~%~@[~A~]"
+            (message c) (expected-type c)
+            (when tok
+              (format nil "actual type: ~A~%       lexem: ~A~%       line: ~A~%       column: ~A~%"
+                      (token-type tok) (token-lexem tok) (token-line tok) (token-column tok))))))
 
 ;; nodes
 
@@ -28,7 +35,7 @@
        direct-slots)))
 
 (defnode program-node ()
-  (name
+  (program-name
    statements-list))
 
 (defnode loop-statement-node ()
@@ -39,3 +46,23 @@
    from-expression ;; prefix notation list
    to-expression
    statements-list))
+
+(defmethod statement-node-to-list ((fn for-statement-node))
+  `(:for :variable ,(node-variable fn) :from ,(node-from-expression fn) :to ,(node-to-expression fn)
+         :statements-list ,(when-let ((nsl (node-statements-list fn)))
+                             (mapcar (lambda (stmt)
+                                       (statement-node-to-list stmt))
+                                     nsl))))
+
+(defmethod statement-node-to-list ((fn loop-statement-node))
+  `(:loop :statements-list ,(when-let ((nsl (node-statements-list fn)))
+                             (mapcar (lambda (stmt)
+                                       (statement-node-to-list stmt))
+                                     nsl))))
+
+(defmethod program-node-to-list ((pn program-node))
+  `(:program-node :name ,(node-program-name pn)
+                  :statements-list ,(when-let ((nsl (node-statements-list pn)))
+                                      (mapcar (lambda (stmt)
+                                                (statement-node-to-list stmt))
+                                              nsl))))

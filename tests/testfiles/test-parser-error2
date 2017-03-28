@@ -9,7 +9,7 @@ BEGIN
         ********************************)
         FOR J := 2+3456-1 TO I DO
           FOR IDENTIFIER0 := IDENTIFIER1 TO IDENTIFUER2 DO
-          ENDFOR;
+          NOTENDFOR;
         ENDFOR;
     ENDFOR;
   ENDLOOP;

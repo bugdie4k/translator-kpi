@@ -26,11 +26,7 @@
         #:alexandria
         #:translator-utils
         #:translator-common)
-  (:export #:lexer
-           ;; 
-           #:wrong-character
-           #:line
-           #:column))
+  (:export #:lexer))
 
 (defpackage #:translator-parser
   (:use #:cl
@@ -53,7 +49,9 @@
         #:translator-lexer
         #:translator-parser
         #:small-tests)
-  (:export #:test-lexer))
+  (:export #:test-lexer
+           #:test-parser
+           #:test-all))
 
 (defpackage #:translator
   (:use #:cl

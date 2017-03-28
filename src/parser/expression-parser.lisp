@@ -1,7 +1,7 @@
 (in-package :translator-parser)
 
 
-(define-condition mallformed-expression (translator-condition)
+(define-condition mallformed-expression (parser-error)
   ((line :reader line :initarg :line :initform nil)
    (column :reader column :initarg :column :initform nil)))
 
@@ -24,7 +24,7 @@
 (defun infix-tokens->prefix-sexp ()
   (named-readtables:in-readtable cmu-infix:syntax)
   (let* ((1st-token (first *token-list*))
-         (start-line (print (token-line 1st-token)))
+         (start-line (token-line 1st-token))
          (start-column (token-column 1st-token)))
     (handler-case (cmu-infix:string->prefix
                    (with-output-to-string (expr-stream)

@@ -19,5 +19,7 @@
                                            (:file "parser-utils")
                                            (:file "expression-parser")))))
                (:module tests
-                :components ((:file "lexer-test")
-                             (:file "parser-test")))))
+                :components ((:file "test-utils")
+                             (:file "lexer-test")
+                             (:file "parser-test")
+                             (:file "toplevel-test")))))

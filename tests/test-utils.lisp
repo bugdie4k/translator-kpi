@@ -54,6 +54,7 @@ and produces test functions with 'deftest' and then calls them."
             `((defun ,lab-test-name ()
                 (let ((failed-test-func-names)
                       (passed-test-func-names))
+                  (format t "--------------------------------------------------~%")
                   (format t "*** ~A ***~%" ',lab-test-name)
                   ;; calling functions test functions
                   ,@(reverse (cons '(format t "~%") test-func-calls))

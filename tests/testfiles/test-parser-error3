@@ -14,7 +14,7 @@ BEGIN
     ENDFOR;
   ENDLOOP;
   FOR K := V0^V1^V2*321-V3 TO V1-V2 DO
-      LOOP
+      
       ENDLOOP;
   ENDFOR;
 END.
