@@ -1,49 +1,5 @@
 (in-package :translator-parser)
 
-(defun throw-unexpected (expected-type actual-token)
-  (error 'unexpected-token :message "Unexpected token." :expected-type expected-type :actual-token actual-token))
-
-(defmacro pop-bind-tokens ((from-n to-n) &body body)
-  `(let* ,(loop for n from from-n to to-n
-              collect (let ((tokenn (symbolicate "TOKEN" (write-to-string n))))
-                        `(,tokenn (pop *token-list*))))
-     ,@body))
-
-(defmacro lookahead-tokens ((from-n to-n) &body body)
-  (let ((count 0))
-    `(let* ,(loop for n from from-n to to-n
-                  collect (let ((tokenn (symbolicate "TOKEN" (write-to-string n))))
-                            `(,tokenn ,(prog1 `(nth ,count *token-list*) (incf count)))))
-       ,@body)))
-
-(defmacro if-unexpected-throw-unexpected (equality-plist &body body)
-  (labels ((%expand-to-if-stmt (plist)
-             (let* ((tok (pop plist))
-                    (tok-type `(token-type ,tok))
-                    (expected (pop plist))
-                    (comparison (if (listp expected)
-                                    (cons 'or (mapcar (lambda (expected-el)
-                                                        `(equalp ,tok-type ,expected-el))
-                                                      expected))
-                                    `(equalp ,tok-type ,expected)))
-                    (expected-to-throw (if (listp expected)
-                                           (with-output-to-string (stream)
-                                             (format stream "~{~A~^ or ~}" expected))
-                                           expected)))
-               (if plist
-                   `(if ,comparison
-                        ,(%expand-to-if-stmt plist)
-                        (throw-unexpected ,expected-to-throw ,tok))
-                   (if body
-                       `(if ,comparison
-                            (progn ,@body)
-                            (throw-unexpected ,expected-to-throw ,tok))
-                       `(unless ,comparison
-                          (throw-unexpected ,expected-to-throw ,tok)))))))
-    (%expand-to-if-stmt equality-plist)))
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
 (defun parser (token-list)
   (let ((*token-list* token-list)
         (*tree*))

@@ -15,11 +15,10 @@
                                            (:file "lexer")))
                              (:module parser
                               :serial t
-                              :components ((:file "parser")
-                                           (:file "parser-utils")
-                                           (:file "expression-parser")))))
+                              :components ((:file "parser-utils")
+                                           (:file "expression-parser")
+                                           (:file "parser")))))
                (:module tests
-                :components ((:file "test-utils")
-                             (:file "lexer-test")
+                :components ((:file "lexer-test")
                              (:file "parser-test")
                              (:file "toplevel-test")))))

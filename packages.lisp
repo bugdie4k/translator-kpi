@@ -35,13 +35,6 @@
         #:translator-common)
   (:export #:parser))
 
-(defpackage #:test-utils
-  (:use #:cl
-        #:alexandria
-        #:translator-common)
-  (:export #:deftest
-           #:deftests))
-
 (defpackage #:translator-tests
   (:use #:cl
         #:alexandria
