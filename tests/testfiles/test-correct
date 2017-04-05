@@ -1,4 +1,4 @@
-PROGRAM TEST01;
+PROGRAM TESTCORRECT;
 BEGIN
   LOOP (* this line is (*commentary and should be ignored *)
     FOR I := -(1 + 2) * 3^7 TO 1234^(3^2) DO

@@ -1,0 +1,25 @@
+PROGRAM TESTCORRECT2;
+BEGIN
+  LOOP 
+    FOR I := 1 TO 2 DO
+        FOR J := 1+2 TO I DO
+          FOR K0 := A TO 2*3 DO
+          ENDFOR;
+          FOR K1 := A1 TO 2*3 DO
+          ENDFOR;
+          FOR K2 := A2 TO 2*3 DO
+          ENDFOR;
+          LOOP
+          ENDLOOP;
+        ENDFOR;
+    ENDFOR;
+  ENDLOOP;
+  FOR K := L*2/34 TO 45/M DO
+      LOOP
+      ENDLOOP;
+  ENDFOR;
+  LOOP
+  ENDLOOP;
+  FOR C := C1 TO C2 DO
+  ENDFOR;
+END.

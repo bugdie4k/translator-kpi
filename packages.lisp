@@ -33,7 +33,8 @@
         #:alexandria
         #:translator-utils
         #:translator-common)
-  (:export #:parser))
+  (:export #:parser
+           #:make-cfg-dot))
 
 (defpackage #:translator-tests
   (:use #:cl

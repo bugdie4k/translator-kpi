@@ -110,3 +110,47 @@
                        `(unless ,comparison
                           (throw-unexpected ,expected-to-throw ,tok)))))))
     (%expand-to-if-stmt equality-plist)))
+
+;; tree to dot
+
+(defmethod program-node->cfg-dot ((pn program-node) stream)
+  "Creates dot file from program-node (абстрактное синтаксическое дерево, окда) and writes it to stream."
+  (let ((prev-vertex) (edge-label-body)
+        (sure-stream (if stream stream (make-string-output-stream)))
+        (statement-count 0))
+    (labels ((%get-reset-edge-body () (prog1 edge-label-body (setf edge-label-body nil)))
+             (%dashes2underscores (str) (map 'string (lambda (char) (if (char= char #\-) #\_ char)) str))
+             (%statement-name (stmt-type) (format nil "~A~A" stmt-type (incf statement-count)))
+             (%stmt-list (lst)
+               (map nil (lambda (stmt)
+                          (%stmt stmt (etypecase stmt
+                                        (for-statement-node :for)
+                                        (loop-statement-node :loop))))
+                    lst))
+             (%stmt (stmt type)
+               (let ((vertex-name (format nil "~A"(ecase type
+                                                    (:for (%statement-name "FOR_STMT"))
+                                                    (:loop (%statement-name "LOOP_STMT"))))))
+                 (ecase type
+                   (:for (format sure-stream "    ~A [label=\"~A\\nfor ~A\\nfrom ~A\\nto ~A\"]~%"
+                                 vertex-name vertex-name (node-variable stmt)
+                                 (node-from-expression stmt) (node-to-expression stmt)))
+                   (:loop (format sure-stream "    ~A [label=\"~A\"]~%" vertex-name vertex-name)))
+                 (format sure-stream "    ~A -> ~A [label=\"~@[~A~]\"]~%" prev-vertex vertex-name (%get-reset-edge-body))
+                 (setf prev-vertex vertex-name)
+                 (setf edge-label-body "body")
+                 (%stmt-list (node-statements-list stmt))
+                 (format sure-stream "    ~A -> ~A [label=\"~@[~A~]\"]~%" prev-vertex vertex-name (%get-reset-edge-body))
+                 (setf prev-vertex vertex-name))))
+      (my-cl-utils:format-concatenate sure-stream
+                                      ("digraph program_graph {~%")
+                                      ("    program [label=\"program name: ~A\\nBEGIN\"]~%" (node-program-name pn)))
+      (setf prev-vertex "program")
+      (%stmt-list (node-statements-list pn))
+      (format sure-stream "    ~A -> END [label=\"~@[~A~]\"]~%" prev-vertex (%get-reset-edge-body))
+      (format sure-stream "}~%")
+      (unless stream (get-output-stream-string sure-stream)))))
+
+(defun make-cfg-dot (&key (programfile (error "NEED PROGRAM KEY ARG")) (cfgfile (error "NEED CFG KEY ARG")))
+  (with-open-file (stream cfgfile :direction :output :if-exists :supersede :if-does-not-exist :create)
+    (program-node->cfg-dot (parser (translator-lexer:lexer programfile)) stream)))

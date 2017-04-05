@@ -1,0 +1,16 @@
+PROGRAM TESTCORRECT3;
+BEGIN
+  FOR A := 1 TO 2 DO
+      LOOP ENDLOOP;
+      FOR G := 1 TO 2 DO
+      ENDFOR;
+      FOR H := 3 TO 4 DO
+      ENDFOR;
+  ENDFOR;
+  FOR B := 3 TO 4 DO
+  ENDFOR;
+  FOR E := 7 TO 8 DO
+  ENDFOR;
+  FOR F := 9 TO 10 DO
+  ENDFOR;  
+END.

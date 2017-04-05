@@ -58,7 +58,7 @@
 (defun ensure-char-upcase (char)
   "Lowercase chars aren't alowed by the grammar, but it is not a big deal converting them to uppercase"
   (if (lower-case-p char)
-      (progn (warn 'wrong-character :message "There is a lowercase character." :char char :line *line* :column *column*)     
+      (progn (warn 'wrong-character :message "There is a lowercase character." :wrong-char char :line *line* :column *column*)     
              (char-upcase char))
       char))
 
