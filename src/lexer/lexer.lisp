@@ -18,6 +18,10 @@
                 (automaton-pass/determine char)))))
     (nreverse *token-list*)))
 
+(defun lexer-handled (filename-or-program-string &key is-program-string (stream t))
+  (handler-case (lexer filename-or-program-string :is-program-string is-program-string)
+     (translator-condition (e) (print-object e stream))))
+
 (defun automaton-pass (char state) 
   "One pass of a lexer automaton."
   (case state
@@ -25,7 +29,7 @@
     (:number-literal (do-number-literal char))
     (:string-literal (do-string-literal char))
     (:whitespace (do-skip-whitespaces))
-    (:assignment (do-assignment-operator char))
+    (:colon (do-colon char))
     (:left-parenthesis (do-left-parensesis char))
     (:right-parenthesis (do-one-char char :right-parenthesis))
     (:comment (do-comment char))
@@ -37,6 +41,7 @@
     (:power (do-one-char char :power))
     (:semicolon (do-one-char char :semicolon))
     (:full-stop (do-one-char char :full-stop))
+    (:comma (do-one-char char :comma))
     (:eof)
     (t (error "WRONG STATE: ~A" state))))
 
@@ -49,7 +54,7 @@
                       (cond ((alpha-char-p char) :identifier)
                             ((digit-char-p char) :number-literal)
                             ((char= char #\quotation_mark) :string-literal)
-                            ((char= char #\colon) :assignment)
+                            ((char= char #\colon) :colon)
                             ((char= char #\left_parenthesis) :left-parenthesis)
                             ((char= char #\right_parenthesis) :right-parenthesis)
                             ((char= char #\plus_sign) :plus)
@@ -59,6 +64,7 @@
                             ((char= char #\circumflex_accent) :power)
                             ((char= char #\semicolon) :semicolon)
                             ((char= char #\full_stop) :full-stop)
+                            ((char= char #\comma) :comma)
                             ;; rest is error
                             (t (error 'wrong-character :message "This character is not allowed." :wrong-char char :line *line* :column *column*))))))))
 
@@ -101,21 +107,31 @@
 
 (defun do-skip-whitespaces ()
   (let ((char (read-next-char)))
+    ;; (format t "~A~%" char)
     (with-eof-check (char)
       (if (whitespace? char)
           (do-skip-whitespaces)
           (automaton-pass/determine char)))))
 
-(defun do-assignment-operator (char)
-  (write-char-to-current-lexem char)
-  (with-eof-check (char)
-   (let ((char (read-next-char)))
-     (if (char= #\equals_sign char)
-         (progn (write-char-to-current-lexem char)
-                (push-token-to-token-list :type :assignment)
-                (automaton-pass/input-determine)) 
-         (error 'wrong-character :message "Assignment operator is expected because of colon character. Second character must be an equals sign: =."
-                                 :column *column* :line *line* :wrong-char char)))))
+(defun do-colon (char)
+  (let ((char2 (read-next-char)))
+    (with-eof-check (char2)
+      (if (char= #\equals_sign char2)
+          (progn (write-char-to-current-lexem char)
+                 (write-char-to-current-lexem char2)
+                 (push-token-to-token-list :type :assignment)
+                 (automaton-pass/input-determine))
+          (do-one-char char :colon)))))
+
+;; (defun do-assignment-operator (char)
+;;   (let ((char (read-next-char)))
+;;     (with-eof-check (char)
+;;       (if (char= #\equals_sign char)
+;;           (progn (write-char-to-current-lexem char)
+;;                  (push-token-to-token-list :type :assignment)
+;;                  (automaton-pass/input-determine)) 
+;;           (error 'wrong-character :message "Assignment operator is expected because of colon character. Second character must be an equals sign: =."
+;;                                   :column *column* :line *line* :wrong-char char)))))
 
 (defun do-left-parensesis (char)
   (with-eof-check (char)

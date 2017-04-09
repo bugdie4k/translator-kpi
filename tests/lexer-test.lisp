@@ -134,14 +134,14 @@ character: &
 line: 3
 column: 3
 ")
-  (error-assignment-operator
-   (handler-case (lexer (get-full-test-pathname "test-lexer-error-assignment-operator"))
-     (translator-lexer::wrong-character (e) (print-object e nil)))
-   "Assignment operator is expected because of colon character. Second character must be an equals sign: =.
-character: 3
-line: 4
-column: 11
-")
+  ;; (error-assignment-operator
+;;    (handler-case (lexer (get-full-test-pathname "test-lexer-error-assignment-operator"))
+;;      (translator-lexer::wrong-character (e) (print-object e nil)))
+;;    "Assignment operator is expected because of colon character. Second character must be an equals sign: =.
+;; character: 3
+;; line: 4
+;; column: 11
+;; ")
   (error-empty-file
    (handler-case (lexer (get-full-test-pathname "test-lexer-error-empty-file"))
      (translator-lexer::empty-file (e) (print-object e nil)))
@@ -163,4 +163,46 @@ column: 4
 character: EOF
 line: 14
 column: 10
-"))
+")
+  (with-labels
+      (extract-token-essentials (lexer (get-full-test-pathname "test-with-labels")))
+    '(("PROGRAM" :PROGRAM 1 0)
+      ("TESTWITHLABELS" :USER-DEFINED-IDENTIFIER 1 8)
+      (";" :SEMICOLON 1 22) ("BEGIN" :BEGIN 3 0) ("FOR" :FOR 3 2)
+      ("A" :USER-DEFINED-IDENTIFIER 3 6) (":=" :ASSIGNMENT 3 8)
+      (1 :NUMBER-LITERAL 3 11) ("TO" :TO 3 13)
+      (2 :NUMBER-LITERAL 3 16) ("DO" :DO 4 18) ("LOOP" :LOOP 5 6)
+      ("LABELS" :LABELS 5 8) (":" :COLON 5 14)
+      (1 :NUMBER-LITERAL 5 16) ("," :COMMA 5 17)
+      (2 :NUMBER-LITERAL 5 19) ("," :COMMA 5 20)
+      (3 :NUMBER-LITERAL 5 22) (";" :SEMICOLON 5 23)
+      ("LABELS" :LABELS 6 8) (":" :COLON 6 14)
+      (4 :NUMBER-LITERAL 6 16) ("," :COMMA 6 17)
+      (5 :NUMBER-LITERAL 6 19) ("," :COMMA 6 20)
+      (6 :NUMBER-LITERAL 6 22) ("," :COMMA 6 23)
+      (7 :NUMBER-LITERAL 6 25) (";" :SEMICOLON 6 26)
+      ("LABELS" :LABELS 7 8) (":" :COLON 7 14)
+      (8 :NUMBER-LITERAL 7 16) (";" :SEMICOLON 7 17)
+      ("ENDLOOP" :ENDLOOP 8 6) (";" :SEMICOLON 8 13) ("FOR" :FOR 9 6)
+      ("G" :USER-DEFINED-IDENTIFIER 9 10) (":=" :ASSIGNMENT 9 12)
+      (1 :NUMBER-LITERAL 9 15) ("TO" :TO 9 17)
+      (2 :NUMBER-LITERAL 9 20) ("DO" :DO 10 22)
+      ("ENDFOR" :ENDFOR 10 6) (";" :SEMICOLON 10 12)
+      ("FOR" :FOR 11 6) ("H" :USER-DEFINED-IDENTIFIER 11 10)
+      (":=" :ASSIGNMENT 11 12) (3 :NUMBER-LITERAL 11 15)
+      ("TO" :TO 11 17) (4 :NUMBER-LITERAL 11 20) ("DO" :DO 12 22)
+      ("ENDFOR" :ENDFOR 12 6) (";" :SEMICOLON 12 12)
+      ("ENDFOR" :ENDFOR 13 2) (";" :SEMICOLON 13 8) ("FOR" :FOR 14 2)
+      ("B" :USER-DEFINED-IDENTIFIER 14 6) (":=" :ASSIGNMENT 14 8)
+      (3 :NUMBER-LITERAL 14 11) ("TO" :TO 14 13)
+      (4 :NUMBER-LITERAL 14 16) ("DO" :DO 15 18)
+      ("ENDFOR" :ENDFOR 15 2) (";" :SEMICOLON 15 8) ("FOR" :FOR 16 2)
+      ("E" :USER-DEFINED-IDENTIFIER 16 6) (":=" :ASSIGNMENT 16 8)
+      (7 :NUMBER-LITERAL 16 11) ("TO" :TO 16 13)
+      (8 :NUMBER-LITERAL 16 16) ("DO" :DO 17 18)
+      ("ENDFOR" :ENDFOR 17 2) (";" :SEMICOLON 17 8) ("FOR" :FOR 18 2)
+      ("F" :USER-DEFINED-IDENTIFIER 18 6) (":=" :ASSIGNMENT 18 8)
+      (9 :NUMBER-LITERAL 18 11) ("TO" :TO 18 13)
+      (10 :NUMBER-LITERAL 18 16) ("DO" :DO 19 19)
+      ("ENDFOR" :ENDFOR 19 2) (";" :SEMICOLON 19 8) ("END" :END 20 0)
+      ("." :FULL-STOP 20 3))))

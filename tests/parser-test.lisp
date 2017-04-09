@@ -14,7 +14,7 @@
                                   "IDENTIFUER2" :STATEMENTS-LIST NIL)))))))
       (:FOR :VARIABLE "K" :FROM
        "(- (* (EXPT V0 (EXPT V1 V2)) 321) V3)" :TO "(- V1 V2)"
-       :STATEMENTS-LIST ((:LOOP :STATEMENTS-LIST NIL))))))
+            :STATEMENTS-LIST ((:LOOP :STATEMENTS-LIST NIL))))))
   (correct2
    (translator-parser::program-node-to-list
     (parser (lexer "/home/danylo/kpi/3/translators-marchenko/translator/tests/testfiles/test-correct2")))
@@ -73,6 +73,21 @@ actual type: ENDLOOP
        line: 18
        column: 6
 ")
+  (with-labels
+      (translator-parser::program-node-to-list
+       (parser (lexer "/home/danylo/kpi/3/translators-marchenko/translator/tests/testfiles/test-with-labels")))
+    `(:PROGRAM-NODE :NAME "TESTWITHLABELS" :STATEMENTS-LIST
+                    ((:FOR :VARIABLE "A" :FROM "1" :TO "2" :STATEMENTS-LIST
+                           ((:LOOP :STATEMENTS-LIST
+                                   ((:LABELS :LABELS-LIST (1 2 3))
+                                    (:LABELS :LABELS-LIST (4 5 6 7))
+                                    (:LABELS :LABELS-LIST (8))))
+                            (:FOR :VARIABLE "G" :FROM "1" :TO "2" :STATEMENTS-LIST NIL)
+                            (:FOR :VARIABLE "H" :FROM "3" :TO "4" :STATEMENTS-LIST
+                                  NIL)))
+                     (:FOR :VARIABLE "B" :FROM "3" :TO "4" :STATEMENTS-LIST NIL)
+                     (:FOR :VARIABLE "E" :FROM "7" :TO "8" :STATEMENTS-LIST NIL)
+                     (:FOR :VARIABLE "F" :FROM "9" :TO "10" :STATEMENTS-LIST NIL))))
   (cfg1
    (translator-parser::program-node->cfg-dot (parser (lexer "/home/danylo/kpi/3/translators-marchenko/translator/tests/testfiles/test-correct")) nil)
    "digraph program_graph {
@@ -164,5 +179,42 @@ actual type: ENDLOOP
     FOR_STMT6 -> FOR_STMT7 [label=\"\"]
     FOR_STMT7 -> FOR_STMT7 [label=\"body\"]
     FOR_STMT7 -> END [label=\"\"]
+}
+")
+  (cfg-with-labels
+   (translator-parser::program-node->cfg-dot (parser (lexer "/home/danylo/kpi/3/translators-marchenko/translator/tests/testfiles/test-with-labels")) nil)
+   "digraph program_graph {
+    program [label=\"program name: TESTWITHLABELS\\nBEGIN\"]
+    FOR_STMT1 [label=\"FOR_STMT1\\nfor A\\nfrom 1\\nto 2\"]
+    program -> FOR_STMT1 [label=\"\"]
+    LOOP_STMT2 [label=\"LOOP_STMT2\"]
+    FOR_STMT1 -> LOOP_STMT2 [label=\"body\"]
+    LABELS_STMT3 [label=\"LABELS_STMT3\\n(1 2 3)\"]
+    LOOP_STMT2 -> LABELS_STMT3 [label=\"body\"]
+    LABELS_STMT3 -> LABELS_STMT3 [label=\"\"]
+    LABELS_STMT4 [label=\"LABELS_STMT4\\n(4 5 6 7)\"]
+    LABELS_STMT3 -> LABELS_STMT4 [label=\"\"]
+    LABELS_STMT4 -> LABELS_STMT4 [label=\"\"]
+    LABELS_STMT5 [label=\"LABELS_STMT5\\n(8)\"]
+    LABELS_STMT4 -> LABELS_STMT5 [label=\"\"]
+    LABELS_STMT5 -> LABELS_STMT5 [label=\"\"]
+    LABELS_STMT5 -> LOOP_STMT2 [label=\"\"]
+    FOR_STMT6 [label=\"FOR_STMT6\\nfor G\\nfrom 1\\nto 2\"]
+    LOOP_STMT2 -> FOR_STMT6 [label=\"\"]
+    FOR_STMT6 -> FOR_STMT6 [label=\"body\"]
+    FOR_STMT7 [label=\"FOR_STMT7\\nfor H\\nfrom 3\\nto 4\"]
+    FOR_STMT6 -> FOR_STMT7 [label=\"\"]
+    FOR_STMT7 -> FOR_STMT7 [label=\"body\"]
+    FOR_STMT7 -> FOR_STMT1 [label=\"\"]
+    FOR_STMT8 [label=\"FOR_STMT8\\nfor B\\nfrom 3\\nto 4\"]
+    FOR_STMT1 -> FOR_STMT8 [label=\"\"]
+    FOR_STMT8 -> FOR_STMT8 [label=\"body\"]
+    FOR_STMT9 [label=\"FOR_STMT9\\nfor E\\nfrom 7\\nto 8\"]
+    FOR_STMT8 -> FOR_STMT9 [label=\"\"]
+    FOR_STMT9 -> FOR_STMT9 [label=\"body\"]
+    FOR_STMT10 [label=\"FOR_STMT10\\nfor F\\nfrom 9\\nto 10\"]
+    FOR_STMT9 -> FOR_STMT10 [label=\"\"]
+    FOR_STMT10 -> FOR_STMT10 [label=\"body\"]
+    FOR_STMT10 -> END [label=\"\"]
 }
 "))

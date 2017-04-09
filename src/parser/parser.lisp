@@ -5,6 +5,10 @@
         (*tree*))
     (parse-program)))
 
+(defun parser-handled (token-list &key (stream t))
+  (handler-case (parser token-list)
+    (translator-condition (e) (print-object e stream))))
+
 (defun parse-program ()
   (pop-bind-tokens (1 3)
     (if-unexpected-throw-unexpected (token1 :program
@@ -31,8 +35,35 @@
                                  (%parse-statements-list-aux))
                            (:for (push (parse-for-statement) statements-list)
                             (%parse-statements-list-aux))
+                           (:labels (push (parse-labels-statement) statements-list)
+                             (%parse-statements-list-aux))
                            (t (reverse statements-list))))))
       (%parse-statements-list-aux))))
+
+(defun parse-labels-statement ()
+  (make-instance 'labels-statement-node
+                 :labels-list (pop-bind-tokens (1 2)
+                                    (if-unexpected-throw-unexpected (token1 :labels
+                                                                     token2 :colon)
+                                      (prog1 (parse-labels-list)
+                                        (pop-bind-tokens (3 3)
+                                          (if-unexpected-throw-unexpected (token3 :semicolon))))))))
+
+(defun parse-labels-list ()
+  (let ((labels-list))
+    (labels ((%parse-labels-list-aux ()
+               (lookahead-tokens (1 1)
+                 (case (token-type token1)
+                   (:number-literal
+                    (pop-bind-tokens (2 2)
+                      (declare (ignore token2)) ; token1 and token2 are same token1
+                      (push (token-lexem token1) labels-list)
+                      (%parse-labels-list-aux)))
+                   (:comma (pop-bind-tokens (2 2)
+                             (declare (ignore token2))
+                             (%parse-labels-list-aux)))
+                   (t (reverse labels-list))))))
+      (%parse-labels-list-aux))))
 
 (defun parse-loop-statement ()
   (make-instance 'loop-statement-node

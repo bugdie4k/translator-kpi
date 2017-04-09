@@ -30,6 +30,7 @@
                                              "ENDFOR" :endfor
                                              "TO" :to
                                              "DO" :do
+                                             "LABELS" :labels
                                              ":=" :assign
                                              "+" :plus
                                              "-" :minus) :test #'equal))
@@ -65,6 +66,7 @@
 (defun read-next-char ()
   "Read char from stream bound to dynamic variable *stream*"
   (let ((char (read-char *stream* nil 'eof)))
+    ;; (format t "char ~A is read~%" char)
     (if (or (eq char 'eof)
             (not (char= char #\newline)))
         (incf *column*)
@@ -87,6 +89,7 @@
                        (:number-literal (parse-number:parse-number lexem))
                        ;;(:string-literal lexem)
                        (t lexem))))
+    ;; (format t "lex ~A of type ~A is pushed~%" sure-lexem sure-type)
     (push (make-token :lexem sure-lexem :type sure-type :line *line* :column *lexem-start-column*) *token-list*)))
 
 (defun whitespace? (char)
@@ -107,3 +110,4 @@
 
 (defun get-keyword-type (keyword)
   (gethash keyword *keywords*))
+

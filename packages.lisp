@@ -26,7 +26,8 @@
         #:alexandria
         #:translator-utils
         #:translator-common)
-  (:export #:lexer))
+  (:export #:lexer
+           #:lexer-handled))
 
 (defpackage #:translator-parser
   (:use #:cl
@@ -34,6 +35,7 @@
         #:translator-utils
         #:translator-common)
   (:export #:parser
+           #:parser-handled
            #:make-cfg-dot))
 
 (defpackage #:translator-tests

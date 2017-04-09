@@ -47,6 +47,9 @@
    to-expression
    statements-list))
 
+(defnode labels-statement-node ()
+  (labels-list))
+
 (defmethod statement-node-to-list ((fn for-statement-node))
   `(:for :variable ,(node-variable fn) :from ,(node-from-expression fn) :to ,(node-to-expression fn)
          :statements-list ,(when-let ((nsl (node-statements-list fn)))
@@ -54,11 +57,14 @@
                                        (statement-node-to-list stmt))
                                      nsl))))
 
-(defmethod statement-node-to-list ((fn loop-statement-node))
-  `(:loop :statements-list ,(when-let ((nsl (node-statements-list fn)))
+(defmethod statement-node-to-list ((ln loop-statement-node))
+  `(:loop :statements-list ,(when-let ((nsl (node-statements-list ln)))
                              (mapcar (lambda (stmt)
                                        (statement-node-to-list stmt))
                                      nsl))))
+
+(defmethod statement-node-to-list ((ln labels-statement-node))
+  `(:labels :labels-list ,(node-labels-list ln)))
 
 (defmethod program-node-to-list ((pn program-node))
   `(:program-node :name ,(node-program-name pn)
@@ -119,28 +125,31 @@
         (sure-stream (if stream stream (make-string-output-stream)))
         (statement-count 0))
     (labels ((%get-reset-edge-body () (prog1 edge-label-body (setf edge-label-body nil)))
-             (%dashes2underscores (str) (map 'string (lambda (char) (if (char= char #\-) #\_ char)) str))
              (%statement-name (stmt-type) (format nil "~A~A" stmt-type (incf statement-count)))
              (%stmt-list (lst)
                (map nil (lambda (stmt)
                           (%stmt stmt (etypecase stmt
                                         (for-statement-node :for)
-                                        (loop-statement-node :loop))))
+                                        (loop-statement-node :loop)
+                                        (labels-statement-node :labels))))
                     lst))
              (%stmt (stmt type)
                (let ((vertex-name (format nil "~A"(ecase type
                                                     (:for (%statement-name "FOR_STMT"))
-                                                    (:loop (%statement-name "LOOP_STMT"))))))
+                                                    (:loop (%statement-name "LOOP_STMT"))
+                                                    (:labels (%statement-name "LABELS_STMT"))))))
                  (ecase type
                    (:for (format sure-stream "    ~A [label=\"~A\\nfor ~A\\nfrom ~A\\nto ~A\"]~%"
                                  vertex-name vertex-name (node-variable stmt)
                                  (node-from-expression stmt) (node-to-expression stmt)))
-                   (:loop (format sure-stream "    ~A [label=\"~A\"]~%" vertex-name vertex-name)))
+                   (:loop (format sure-stream "    ~A [label=\"~A\"]~%" vertex-name vertex-name))
+                   (:labels (format sure-stream "    ~A [label=\"~A\\n~A\"]~%" vertex-name vertex-name (node-labels-list stmt))))
                  (format sure-stream "    ~A -> ~A [label=\"~@[~A~]\"]~%" prev-vertex vertex-name (%get-reset-edge-body))
                  (setf prev-vertex vertex-name)
-                 (setf edge-label-body "body")
-                 (%stmt-list (node-statements-list stmt))
-                 (format sure-stream "    ~A -> ~A [label=\"~@[~A~]\"]~%" prev-vertex vertex-name (%get-reset-edge-body))
+                 (unless (eq type :labels)
+                   (setf edge-label-body "body")
+                   (%stmt-list (node-statements-list stmt))
+                   (format sure-stream "    ~A -> ~A [label=\"~@[~A~]\"]~%" prev-vertex vertex-name (%get-reset-edge-body)))
                  (setf prev-vertex vertex-name))))
       (my-cl-utils:format-concatenate sure-stream
                                       ("digraph program_graph {~%")
