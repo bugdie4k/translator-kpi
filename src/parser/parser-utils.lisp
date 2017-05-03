@@ -120,7 +120,7 @@
 ;; tree to dot
 
 (defmethod program-node->cfg-dot ((pn program-node) stream)
-  "Creates dot file from program-node (абстрактное синтаксическое дерево, окда) and writes it to stream."
+  "Creates dot file fro CFG from program-node (program-node это типа абстрактное синтаксическое дерево, окда) and writes it to stream."
   (let ((prev-vertex) (edge-label-body)
         (sure-stream (if stream stream (make-string-output-stream)))
         (statement-count 0))
