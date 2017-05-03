@@ -1,5 +1,5 @@
-Depends on small-tests - https://github.com/fedorough/small-tests
-and my-cl-utils - https://github.com/bugdie4k/my-cl-utils
+Depends on [small-tests](https://github.com/fedorough/small-tests)
+and [my-cl-utils](https://github.com/bugdie4k/my-cl-utils)
 
 The grammar is:
 
