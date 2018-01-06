@@ -151,9 +151,8 @@
                    (%stmt-list (node-statements-list stmt))
                    (format sure-stream "    ~A -> ~A [label=\"~@[~A~]\"]~%" prev-vertex vertex-name (%get-reset-edge-body)))
                  (setf prev-vertex vertex-name))))
-      (my-cl-utils:format-concatenate sure-stream
-                                      ("digraph program_graph {~%")
-                                      ("    program [label=\"program name: ~A\\nBEGIN\"]~%" (node-program-name pn)))
+      (format sure-stream "digraph program_graph {~%")
+      (format sure-stream "    program [label=\"program name: ~A\\nBEGIN\"]~%" (node-program-name pn))
       (setf prev-vertex "program")
       (%stmt-list (node-statements-list pn))
       (format sure-stream "    ~A -> END [label=\"~@[~A~]\"]~%" prev-vertex (%get-reset-edge-body))

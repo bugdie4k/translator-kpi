@@ -1,10 +1,13 @@
 (in-package :translator-tests)
 
 (defun extract-token-essentials (token-list)
-  (mapcar (lambda (token) (list (token-lexem token) (token-type token) (token-line token) (token-column token))) token-list))
-
-(defun get-full-test-pathname (testname)
-  (merge-pathnames "/home/danylo/kpi/3/translators-marchenko/translator/tests/testfiles/" (pathname testname)))
+  (mapcar
+   (lambda (token)
+     (list (token-lexem token)
+           (token-type token)
+           (token-line token)
+           (token-column token)))
+   token-list))
 
 (deftests test-lexer ()
   (correct1
@@ -145,9 +148,9 @@ column: 3
   (error-empty-file
    (handler-case (lexer (get-full-test-pathname "test-lexer-error-empty-file"))
      (translator-lexer::empty-file (e) (print-object e nil)))
-   "This file is empty.
-file: /home/danylo/kpi/3/translators-marchenko/translator/tests/testfiles/test-lexer-error-empty-file
-")
+   (format nil "This file is empty.
+file: ~A
+" (namestring (get-full-test-pathname "test-lexer-error-empty-file"))))
   (error-unexpected-eof1
    (handler-case (lexer (get-full-test-pathname "test-lexer-error-unexpected-eof1"))
      (translator-lexer::wrong-character (e) (print-object e nil)))

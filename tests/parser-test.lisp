@@ -3,7 +3,7 @@
 (deftests test-parser ()
   (correct1
    (translator-parser::program-node-to-list
-    (parser (lexer "/home/danylo/kpi/3/translators-marchenko/translator/tests/testfiles/test-correct")))
+    (parser (lexer (get-full-test-pathname "test-correct"))))
    '(:PROGRAM-NODE :NAME "TESTCORRECT" :STATEMENTS-LIST
      ((:LOOP :STATEMENTS-LIST
              ((:FOR :VARIABLE "I" :FROM "(- (* (+ 1 2) (EXPT 3 7)))" :TO
@@ -17,7 +17,7 @@
             :STATEMENTS-LIST ((:LOOP :STATEMENTS-LIST NIL))))))
   (correct2
    (translator-parser::program-node-to-list
-    (parser (lexer "/home/danylo/kpi/3/translators-marchenko/translator/tests/testfiles/test-correct2")))
+    (parser (lexer (get-full-test-pathname "test-correct2"))))
    '(:PROGRAM-NODE :NAME "TESTCORRECT2" :STATEMENTS-LIST
      ((:LOOP :STATEMENTS-LIST
              ((:FOR :VARIABLE "I" :FROM "1" :TO "2" :STATEMENTS-LIST
@@ -36,7 +36,7 @@
       (:FOR :VARIABLE "C" :FROM "C1" :TO "C2" :STATEMENTS-LIST NIL))))
   (correct3
    (translator-parser::program-node-to-list
-    (parser (lexer "/home/danylo/kpi/3/translators-marchenko/translator/tests/testfiles/test-correct3")))
+    (parser (lexer (get-full-test-pathname "test-correct3"))))
    '(:PROGRAM-NODE :NAME "TESTCORRECT3" :STATEMENTS-LIST
      ((:FOR :VARIABLE "A" :FROM "1" :TO "2" :STATEMENTS-LIST
        ((:LOOP :STATEMENTS-LIST NIL)
@@ -47,14 +47,14 @@
       (:FOR :VARIABLE "E" :FROM "7" :TO "8" :STATEMENTS-LIST NIL)
       (:FOR :VARIABLE "F" :FROM "9" :TO "10" :STATEMENTS-LIST NIL))))
   (error1
-   (handler-case (parser (lexer "/home/danylo/kpi/3/translators-marchenko/translator/tests/testfiles/test-parser-error1"))
+   (handler-case (parser (lexer (get-full-test-pathname "test-parser-error1")))
      (translator-parser::parser-error (e) (print-object e nil)))
    "There is a mallformed expression.
 line: 10
 column: 17
 ")
   (error2
-   (handler-case (parser (lexer "/home/danylo/kpi/3/translators-marchenko/translator/tests/testfiles/test-parser-error2"))
+   (handler-case (parser (lexer (get-full-test-pathname "test-parser-error2")))
      (translator-parser::parser-error (e) (print-object e nil)))
    "Unexpected token.
 expected type: ENDFOR
@@ -64,7 +64,7 @@ actual type: USER-DEFINED-IDENTIFIER
        column: 10
 ")
   (error3
-   (handler-case (parser (lexer "/home/danylo/kpi/3/translators-marchenko/translator/tests/testfiles/test-parser-error3"))
+   (handler-case (parser (lexer (get-full-test-pathname "test-parser-error3")))
      (translator-parser::parser-error (e) (print-object e nil)))
    "Unexpected token.
 expected type: ENDFOR
@@ -75,7 +75,7 @@ actual type: ENDLOOP
 ")
   (with-labels
       (translator-parser::program-node-to-list
-       (parser (lexer "/home/danylo/kpi/3/translators-marchenko/translator/tests/testfiles/test-with-labels")))
+       (parser (lexer (get-full-test-pathname "test-with-labels"))))
     `(:PROGRAM-NODE :NAME "TESTWITHLABELS" :STATEMENTS-LIST
                     ((:FOR :VARIABLE "A" :FROM "1" :TO "2" :STATEMENTS-LIST
                            ((:LOOP :STATEMENTS-LIST
@@ -89,7 +89,8 @@ actual type: ENDLOOP
                      (:FOR :VARIABLE "E" :FROM "7" :TO "8" :STATEMENTS-LIST NIL)
                      (:FOR :VARIABLE "F" :FROM "9" :TO "10" :STATEMENTS-LIST NIL))))
   (cfg1
-   (translator-parser::program-node->cfg-dot (parser (lexer "/home/danylo/kpi/3/translators-marchenko/translator/tests/testfiles/test-correct")) nil)
+   (translator-parser::program-node->cfg-dot
+    (parser (lexer (get-full-test-pathname "test-correct"))) nil)
    "digraph program_graph {
     program [label=\"program name: TESTCORRECT\\nBEGIN\"]
     LOOP_STMT1 [label=\"LOOP_STMT1\"]
@@ -114,7 +115,7 @@ actual type: ENDLOOP
 }
 ")
   (cfg2
-   (translator-parser::program-node->cfg-dot (parser (lexer "/home/danylo/kpi/3/translators-marchenko/translator/tests/testfiles/test-correct2")) nil)
+   (translator-parser::program-node->cfg-dot (parser (lexer (get-full-test-pathname "test-correct2"))) nil)
    "digraph program_graph {
     program [label=\"program name: TESTCORRECT2\\nBEGIN\"]
     LOOP_STMT1 [label=\"LOOP_STMT1\"]
@@ -154,7 +155,7 @@ actual type: ENDLOOP
 }
 ")
   (cfg3
-   (translator-parser::program-node->cfg-dot (parser (lexer "/home/danylo/kpi/3/translators-marchenko/translator/tests/testfiles/test-correct3")) nil)
+   (translator-parser::program-node->cfg-dot (parser (lexer (get-full-test-pathname "test-correct3"))) nil)
    "digraph program_graph {
     program [label=\"program name: TESTCORRECT3\\nBEGIN\"]
     FOR_STMT1 [label=\"FOR_STMT1\\nfor A\\nfrom 1\\nto 2\"]
@@ -182,7 +183,7 @@ actual type: ENDLOOP
 }
 ")
   (cfg-with-labels
-   (translator-parser::program-node->cfg-dot (parser (lexer "/home/danylo/kpi/3/translators-marchenko/translator/tests/testfiles/test-with-labels")) nil)
+   (translator-parser::program-node->cfg-dot (parser (lexer (get-full-test-pathname "test-with-labels"))) nil)
    "digraph program_graph {
     program [label=\"program name: TESTWITHLABELS\\nBEGIN\"]
     FOR_STMT1 [label=\"FOR_STMT1\\nfor A\\nfrom 1\\nto 2\"]
